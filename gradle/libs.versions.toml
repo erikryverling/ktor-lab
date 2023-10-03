@@ -1,0 +1,28 @@
+[versions]
+
+kotlin = "1.9.10"
+ktor = "2.3.4"
+kotlin-serialization = "1.8.0"
+logback-classic = "1.4.11"
+slf4j = "2.0.9"
+
+[plugins]
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-serialization" }
+
+[libraries]
+
+# ktor
+ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-netty-jvm = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-server-contentNegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+# Third party
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-classic" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+
+# Test
+ktor-server-tests-jvm = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

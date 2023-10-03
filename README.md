@@ -1,2 +1,2 @@
-# ktor-lab
-💡 Ktor Boot lab
+# Ktor Lab
+This is where I play around and learn Ktor
