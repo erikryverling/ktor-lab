@@ -1,0 +1,5 @@
+#!/bin/sh
+./gradlew clean assemble
+cp build/libs/*all.jar src/main/docker/application.jar
+docker compose -f src/main/docker/docker-compose.yml -p ktor-lab up --build -d
+rm src/main/docker/application.jar
