@@ -1,6 +1,8 @@
 package se.yverling.lab.ktor
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.*
+import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import se.yverling.lab.ktor.plugins.configureRouting
@@ -12,6 +14,11 @@ fun main() {
 }
 
 fun Application.module() {
-    configureRouting()
+    val config = HoconApplicationConfig(ConfigFactory.load())
+
+    val dbHost = config.property("ktor.db.host").getString()
+    val dbPort = config.property("ktor.db.port").getString().toInt()
+
+    configureRouting(dbHost, dbPort)
     configureSerialization()
 }

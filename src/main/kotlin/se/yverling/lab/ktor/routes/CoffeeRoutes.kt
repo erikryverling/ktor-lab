@@ -5,13 +5,43 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import redis.clients.jedis.JedisPooled
+import redis.clients.jedis.search.FTCreateParams
+import redis.clients.jedis.search.IndexDataType
+import redis.clients.jedis.search.Query
+import redis.clients.jedis.search.schemafields.TextField
 import se.yverling.lab.ktor.models.Coffee
-import se.yverling.lab.ktor.models.coffeeStorage
+import se.yverling.lab.ktor.models.toCoffee
 
-fun Route.coffeeRouting() {
+private const val INDEX = "idx:coffees"
+private const val PREFIX = "coffee"
+
+
+fun Route.coffeeRouting(dbHost: String, dbPort: Int) {
+    val jedis = JedisPooled(dbHost, dbPort)
+
+    jedis.ftDropIndex(INDEX)
+
+    jedis.ftCreate(
+        "idx:coffees",
+        FTCreateParams.createParams()
+            .on(IndexDataType.JSON)
+            .addPrefix(PREFIX),
+        TextField.of("$.name").`as`("name"),
+        TextField.of("$.roaster").`as`("roaster"),
+        TextField.of("$.origin").`as`("origin")
+    )
+
     route("/coffee") {
         get {
-            call.respond(coffeeStorage)
+            val query = Query("*")
+            val documents = jedis.ftSearch(INDEX, query).documents
+
+            val coffees = documents.map {
+                it.toCoffee()
+            }
+
+            call.respond(coffees)
         }
 
         get("{id?}") {
@@ -19,27 +49,27 @@ fun Route.coffeeRouting() {
                 "Missing id",
                 status = HttpStatusCode.BadRequest
             )
-            val customer =
-                coffeeStorage.find { it.id == id } ?: return@get call.respondText(
+
+            val coffee = jedis.jsonGet("$PREFIX:$id", Coffee::class.java)
+                ?: return@get call.respondText(
                     "No coffee with id $id",
                     status = HttpStatusCode.NotFound
                 )
-            call.respond(customer)
+
+            call.respond(coffee)
         }
 
         post {
-            val customer = call.receive<Coffee>()
-            coffeeStorage.add(customer)
+            val coffee = call.receive<Coffee>()
+            jedis.jsonSetWithEscape("$PREFIX:${coffee.id}", coffee)
+
             call.respondText("Coffee stored correctly", status = HttpStatusCode.Created)
         }
 
         delete("{id?}") {
             val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
-            if (coffeeStorage.removeIf { it.id == id }) {
-                call.respondText("Coffee removed correctly", status = HttpStatusCode.Accepted)
-            } else {
-                call.respondText("Not Found", status = HttpStatusCode.NotFound)
-            }
+            jedis.del("$PREFIX:$id")
+            call.respondText("Coffee removed correctly", status = HttpStatusCode.Accepted)
         }
     }
 }

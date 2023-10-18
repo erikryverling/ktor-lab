@@ -6,3 +6,14 @@ services:
     container_name: app
     ports:
       - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=6379
+  db:
+    image: 'redis/redis-stack'
+    container_name: db
+    ports:
+      - "6380:6379"
+      - "8002:8001"

@@ -11,6 +11,7 @@ import junit.framework.TestCase.assertEquals
 import se.yverling.lab.ktor.models.Coffee
 import se.yverling.lab.ktor.plugins.configureRouting
 import se.yverling.lab.ktor.plugins.configureSerialization
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertIs
 
@@ -18,7 +19,7 @@ class ApplicationTest {
     @Test
     fun `should store and retrieve coffee successfully`() = testApplication {
         application {
-            configureRouting()
+            configureRouting("localhost", 6380)
             configureSerialization()
         }
 
@@ -28,7 +29,8 @@ class ApplicationTest {
             }
         }
 
-        val testCoffee = Coffee(name = "Guji Supreme", roaster = "Test roaster", origin = "Guji")
+        val id = UUID.randomUUID().toString()
+        val testCoffee = Coffee(id = id, name = "Guji Supreme", roaster = "Test roaster", origin = "Guji")
 
         // Post
 
@@ -40,13 +42,11 @@ class ApplicationTest {
         assertEquals("Coffee stored correctly", response.bodyAsText())
         assertEquals(HttpStatusCode.Created, response.status)
 
-        // Get by id
+        response = client.get("/coffee/$id")
 
-        response = client.get("/coffee")
-
-        val coffees = response.body<List<Coffee>>()
+        val coffee = response.body<Coffee>()
         assertEquals(HttpStatusCode.OK, response.status)
-        assertIs<List<Coffee>>(coffees)
-        assertEquals(coffees[0], testCoffee)
+        assertIs<Coffee>(coffee)
+        assertEquals(coffee, testCoffee)
     }
 }

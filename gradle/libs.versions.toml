@@ -1,8 +1,12 @@
 [versions]
 
 kotlin = "1.9.10"
-ktor = "2.3.4"
 kotlin-serialization = "1.8.0"
+
+ktor = "2.3.4"
+
+jedis = "5.0.1"
+
 logback-classic = "1.4.11"
 slf4j = "2.0.9"
 
@@ -20,6 +24,8 @@ ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotia
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 # Third party
+jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
+
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-classic" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
