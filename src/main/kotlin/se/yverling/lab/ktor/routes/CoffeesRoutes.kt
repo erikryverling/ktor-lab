@@ -14,16 +14,14 @@ import se.yverling.lab.ktor.models.Coffee
 import se.yverling.lab.ktor.models.toCoffee
 
 private const val INDEX = "idx:coffees"
-private const val PREFIX = "coffee"
+private const val PREFIX = "coffees"
 
 
-fun Route.coffeeRouting(dbHost: String, dbPort: Int) {
+fun Route.coffeesRouting(dbHost: String, dbPort: Int) {
     val jedis = JedisPooled(dbHost, dbPort)
 
-    jedis.ftDropIndex(INDEX)
-
     jedis.ftCreate(
-        "idx:coffees",
+        INDEX,
         FTCreateParams.createParams()
             .on(IndexDataType.JSON)
             .addPrefix(PREFIX),
@@ -32,7 +30,7 @@ fun Route.coffeeRouting(dbHost: String, dbPort: Int) {
         TextField.of("$.origin").`as`("origin")
     )
 
-    route("/coffee") {
+    route("/coffees") {
         get {
             val query = Query("*")
             val documents = jedis.ftSearch(INDEX, query).documents
