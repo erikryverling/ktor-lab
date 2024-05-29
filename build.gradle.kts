@@ -1,7 +1,8 @@
 plugins {
-    kotlin("jvm").version(libs.versions.kotlin.asProvider().get())
+    alias(libs.plugins.kotlin)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.versions)
 }
 
 group = "se.yverling.lab.ktor"
@@ -32,4 +33,17 @@ dependencies {
     testImplementation(libs.ktor.client.contentNegotiation)
     testImplementation(libs.ktor.server.tests.jvm)
     testImplementation(libs.kotlin.test.junit)
+}
+
+tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+    rejectVersionIf {
+        isNonStable(candidate.version)
+    }
+}
+
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
 }
